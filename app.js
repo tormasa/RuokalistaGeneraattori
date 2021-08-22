@@ -103,8 +103,14 @@ function getDataFromSheets(auth) {
 	const sheets = google.sheets({version: 'v4', auth});
 	var foods = [];
 	var types = [];
+	var content;
 
-	getFoodTypes(sheets, types, foods);
+	try {
+		content = JSON.parse(fs.readFileSync('sheets-id.json'));
+		getFoodTypes(content.id, sheets, types, foods);
+	} catch (error) {
+		console.error('No sheets id file');
+	}
 }
 
 function dataRetrieved(types, foods) {
@@ -161,9 +167,9 @@ function canSelectFood(selectedFoods, newFood) {
 	return canBeSelected;
 }
 
-function getFoodTypes(sheets, types, foods) {
+function getFoodTypes(id, sheets, types, foods) {
 	sheets.spreadsheets.values.get({
-		spreadsheetId: '1OEI1u4FIomeMmL6HybD03OS-ZszPQFv_dWAqNwsCQNw',
+		spreadsheetId: id,
 		range: 'MaxViikossa!A2:B'
 	}, (err, res) => {
 		if (err) return console.log('The API returned an error: ' + err);
@@ -179,13 +185,13 @@ function getFoodTypes(sheets, types, foods) {
 			console.log('No data found.');
 		}
 
-		getFoods(sheets, types, foods);
+		getFoods(id, sheets, types, foods);
 	});
 }
 
-function getFoods(sheets, types, foods) {
+function getFoods(id, sheets, types, foods) {
 	sheets.spreadsheets.values.get({
-		spreadsheetId: '1OEI1u4FIomeMmL6HybD03OS-ZszPQFv_dWAqNwsCQNw',
+		spreadsheetId: id,
 		range: 'Ruokat!A2:B'
 	}, (err, res) => {
 		if (err) return console.log('The API returned an error: ' + err);
